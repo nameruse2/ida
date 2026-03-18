@@ -1,6 +1,5 @@
 
 Todo:
-- add nameserver collection in rdapdomain
 - get csv working
 - improve date/time rdapdomain
 - rdap ip search
@@ -9,7 +8,6 @@ Todo:
 - subdomain finder
 - tls extract and search
 - abuse ch integration
-- auto domain/ip detection
 
 
 Structure:
