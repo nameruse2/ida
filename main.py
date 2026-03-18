@@ -1,7 +1,9 @@
 import argparse
 import json
 import pprint
-from services.rdapdomain import RDAPClient
+import ipaddress
+from services.rdapdomain import RDAPDomainClient
+from services.rdapip import RDAPIPClient
 from utils.io import load_input
 
 def parse_args():
@@ -33,8 +35,13 @@ def main():
     args = parse_args()
     features = resolve_features(args)
     selectors = load_input(args.input)
-    rdap = RDAPClient()
     results = []
+
+    try:
+        ipaddress.ip_address(selectors[0])
+        rdap = RDAPIPClient()
+    except ValueError:
+        rdap = RDAPDomainClient()
 
     for domain in selectors:
         row = {"domain": domain}
