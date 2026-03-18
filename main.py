@@ -6,38 +6,49 @@ from utils.io import load_input
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="RDAP Query - Retrieve domain registration data using RDAP protocol"
+        description="IDA - IP and Domain analysis"
     )
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-d", "--domain", help="Single domain to query")
-    parser.add_argument("input", action="store_true")
+
+    parser.add_argument("input")
     parser.add_argument("--rdap", action="store_true")
     parser.add_argument("--all", action="store_true")
-    group.add_argument("-f", "--file", help="File containing domains (one per line)")
+
     parser.add_argument("-o", "--output", help="Output to CSV file")
 
     return parser.parse_args()
 
+
+def resolve_features(args):
+    if args.all:
+        return ["rdap", "dns", "ip", "tor"]
+
+    selected = []
+    if args.rdap:
+        selected.append("rdap")
+
+    return selected or ["rdap"]  # default
+
+
 def main():
     args = parse_args()
-    # Process based on input type
-    if args.domain:
-        # Query a single domain
-        client = RDAPClient()
-        results: list[dict] = [client.lookup(args.domain)]
-        pprint.pprint(results)
+    features = resolve_features(args)
+    selectors = load_input(args.input)
+    rdap = RDAPClient()
+    results = []
 
-    else:
-        # Process domains from file
-        client = RDAPClient()
-        with open(args.file, mode="r", encoding="utf-8") as txtfile:
-            data: list = [line.strip() for line in txtfile if line.strip()]
-       
-        results: list[dict] = [client.lookup(domain=i) for i in data]
-        pprint.pprint(results)
+    for domain in selectors:
+        row = {"domain": domain}
 
-    if args.output:
-        write_to_csv(results, args.output)
+        if "rdap" in features:
+            row.update(rdap.lookup(domain))
+
+        results.append(row)
+
+    for r in results:
+        pprint.pprint(r)
+
+    # if args.csv:
+        # save_csv(results, args.csv)
 
 
 
