@@ -1,6 +1,6 @@
 import requests
 
-class RDAPClient:
+class RDAPDomainClient:
     BOOTSTRAP_URL = "https://data.iana.org/rdap/dns.json"
     def __init__(self):
         self.session = requests.Session()
@@ -68,6 +68,7 @@ class RDAPClient:
             "expiration_date": "",
             "last_changed_date": "",
             "registration_date": "",
+            "nameservers": "",
         }
 
         events: dict = {
@@ -87,6 +88,20 @@ class RDAPClient:
                         if item[0] == "fn":
                             data["registrar"] = item[3]
                             break
+                        
+        nameservers = []
+        for ns in rdap_json.get("nameservers", []):
+            if isinstance(ns, dict):
+                name = ns.get("ldhName") or ns.get("handle") or ns.get("name")
+                if name:
+                    nameservers.append(name.lower())
+            elif isinstance(ns, str):
+                nameservers.append(ns.lower())
+
+        # optionally dedupe & sort
+        nameservers = sorted(set(nameservers))
+        data["nameservers"] = nameservers
+
         return data
 
     
