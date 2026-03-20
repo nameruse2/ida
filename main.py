@@ -56,7 +56,7 @@ def main():
             row.update(rdap.lookup(item))
 
         if "asn" in features and identity == "ip":
-            print(cymru(item))
+            row.update(cymru(item))
             
         results.append(row)
 

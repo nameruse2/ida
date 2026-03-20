@@ -13,7 +13,13 @@ def cymru_ipv4_to_asn(ip: str) -> str:
     return f"AS{parts[0]}"
 
 def cymru_ipv6_to_asn(ip: str):
-    pass
+    expanded = ipaddress.ip_address(ip).exploded.replace(":", "")
+    reversed_ip = ".".join(reversed(expanded))
+    query = f"{reversed_ip}.origin6.asn.cymru.com"
+    answer = dns.resolver.resolve(query, "TXT")[0]
+    txt = answer.to_text().strip('"')
+    parts = txt.split(" | ")
+    return f"AS{parts[0]}"
 
 
 def cymru_asn(asn):

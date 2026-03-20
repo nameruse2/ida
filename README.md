@@ -8,6 +8,7 @@ Todo:
 - subdomain finder
 - tls extract and search
 - abuse ch integration
+- add caching to RDAP IP and Cymru ASN
 
 
 Structure:
