@@ -5,6 +5,7 @@ import ipaddress
 from services.rdapdomain import RDAPDomainClient
 from services.rdapip import RDAPIPClient
 from services.asn import cymru
+from services.dns import dns_lookup
 from utils.io import load_input
 
 def parse_args():
@@ -15,6 +16,7 @@ def parse_args():
     parser.add_argument("input")
     parser.add_argument("--rdap", action="store_true")
     parser.add_argument("--asn", action="store_true")
+    parser.add_argument("--dns", action="store_true")
     parser.add_argument("--all", action="store_true")
 
     parser.add_argument("-o", "--output", help="Output to CSV file")
@@ -31,6 +33,8 @@ def resolve_features(args):
         selected.append("rdap")
     if args.asn:
         selected.append("asn")
+    if args.dns:
+        selected.append("dns")
 
     return selected or ["rdap"]  # default
 
@@ -57,6 +61,9 @@ def main():
 
         if "asn" in features and identity == "ip":
             row.update(cymru(item))
+            
+        if "dns" in features and identity == "domain":
+            row.update(dns_lookup(item))
             
         results.append(row)
 
