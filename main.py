@@ -4,6 +4,7 @@ import pprint
 import ipaddress
 from services.rdapdomain import RDAPDomainClient
 from services.rdapip import RDAPIPClient
+from services.asn import cymru
 from utils.io import load_input
 
 def parse_args():
@@ -13,6 +14,7 @@ def parse_args():
 
     parser.add_argument("input")
     parser.add_argument("--rdap", action="store_true")
+    parser.add_argument("--asn", action="store_true")
     parser.add_argument("--all", action="store_true")
 
     parser.add_argument("-o", "--output", help="Output to CSV file")
@@ -22,11 +24,13 @@ def parse_args():
 
 def resolve_features(args):
     if args.all:
-        return ["rdap", "dns", "ip", "tor"]
+        return ["rdap", "asn", "dns", "ip", "tor"]
 
     selected = []
     if args.rdap:
         selected.append("rdap")
+    if args.asn:
+        selected.append("asn")
 
     return selected or ["rdap"]  # default
 
@@ -40,15 +44,20 @@ def main():
     try:
         ipaddress.ip_address(selectors[0])
         rdap = RDAPIPClient()
+        identity = "ip"
     except ValueError:
         rdap = RDAPDomainClient()
-
-    for domain in selectors:
-        row = {"domain": domain}
+        identity = "domain"
+        
+    for item in selectors:
+        row = {"domain": item}
 
         if "rdap" in features:
-            row.update(rdap.lookup(domain))
+            row.update(rdap.lookup(item))
 
+        if "asn" in features and identity == "ip":
+            row.update(cymru(item))
+            
         results.append(row)
 
     for r in results:
