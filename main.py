@@ -6,6 +6,8 @@ from services.rdapdomain import RDAPDomainClient
 from services.rdapip import RDAPIPClient
 from services.asn import cymru
 from services.dns import dns_lookup
+from services.ipthc import ipThcRdns
+from services.ipthc import ipThcSubdomain
 from utils.io import load_input
 
 def parse_args():
@@ -14,10 +16,12 @@ def parse_args():
     )
 
     parser.add_argument("input")
+    parser.add_argument("--all", action="store_true")
     parser.add_argument("--rdap", action="store_true")
     parser.add_argument("--asn", action="store_true")
     parser.add_argument("--dns", action="store_true")
-    parser.add_argument("--all", action="store_true")
+    parser.add_argument("--rdns", action="store_true")
+    parser.add_argument("--subdomain", action="store_true")
 
     parser.add_argument("-o", "--output", help="Output to CSV file")
 
@@ -26,7 +30,7 @@ def parse_args():
 
 def resolve_features(args):
     if args.all:
-        return ["rdap", "asn", "dns", "ip", "tor"]
+        return ["rdap", "asn", "dns", "ip", "tor", "rdns", "subdomain"]
 
     selected = []
     if args.rdap:
@@ -35,6 +39,10 @@ def resolve_features(args):
         selected.append("asn")
     if args.dns:
         selected.append("dns")
+    if args.rdns:
+        selected.append("rdns")
+    if args.subdomain:
+        selected.append("subdomain")
 
     return selected or ["rdap"]  # default
 
@@ -64,6 +72,12 @@ def main():
             
         if "dns" in features and identity == "domain":
             row.update(dns_lookup(item))
+
+        if "rdns" in features and identity == "ip":
+            row.update(ipThcRdns(item))
+
+        if "subdomain" in features and identity == "domain":
+            row.update(ipThcSubdomain(item))
             
         results.append(row)
 
