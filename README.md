@@ -2,14 +2,12 @@
 Todo:
 - get csv working
 - improve date/time rdapdomain
-- rdap ip search
-- dns search
 - tor checker
 - subdomain finder
 - tls extract and search
 - abuse ch integration
 - add caching to RDAP IP and Cymru ASN
-
+- geoIP
 
 Structure:
 Main.py:
